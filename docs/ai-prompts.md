@@ -78,39 +78,17 @@ Once the plan is clear, tell me what my next steps should be to start building t
 ---
 
 ## Prompt Group 0C: Generated Master Backend Prompt (for Antigravity)
-**Goal**: Specialized generation prompt specifying single-responsibility backend architecture, schema, business rules, testing, and error handling.
+**Goal**: Build the backend according to the assignment requirements and the plan decided during the initial planning stage.
 
 **Prompt**:
-> Build a Node.js + TypeScript + Express backend for a purchase requisition system.
-> Database: Postgres hosted on Supabase. Auth: Supabase Auth (email/password); the backend verifies the Supabase-issued JWT on every request and does not implement its own login/signup.
-> 
-> MODULE STRUCTURE (one responsibility per module, do not merge these):
-> config, db/migrations, middleware (auth, requireRole, errorHandler), errors (AppError + ValidationError/AuthenticationError/ForbiddenError/NotFoundError/ConflictError subclasses), validation (per-resource schemas using zod), and one module per resource: profiles, requisitions, lineItems, approvals, ordering, receiving, assignedApprovers, comments, timeline, alerts, dashboard, exports.
-> The timeline module is the ONLY module allowed to insert into requisition_history — every other module calls into it rather than writing history rows itself.
-> 
-> DATABASE SCHEMA — create exactly these tables (see full column list, types, and constraints in the "Database schema" section of the attached plan):
-> profiles, requisitions, line_items, requisition_assigned_approvers, requisition_history, alert_dismissals. Requisition totals are NEVER stored — always computed server-side as SUM(ordered_quantity * unit_price). Enforce non-negativity and quantity constraints at the database level via CHECK constraints, in addition to application validation.
-> 
-> BUSINESS RULES (enforce ALL of these server-side, never trust the client):
-> - Roles: 'requester' and 'approver', fixed per account. Requesters create/edit/submit only their own Draft requisitions. Approvers cannot create requisitions or edit line items, except extending needed_by on an Ordered requisition.
-> - Lifecycle: Draft -> Submitted -> (Approved | Rejected). Approved -> Ordered -> Received. Rejected always returns to Draft (requires a non-empty reason). Any other transition must be rejected with 409 and an explanatory message.
-> - Approval: an approver may approve/reject any Submitted requisition (assignment is NOT a permission gate — every approver can see and act on the full queue). Approval succeeds only if the server-computed total <= that approver's own approval_limit; otherwise return 409 with code LIMIT_EXCEEDED and leave the requisition Submitted (no separate "escalated" state — it just waits for a sufficiently-authorized approver).
-> - Bulk approve: accepts a list of requisition ids, checks EACH independently against the caller's limit, and returns a per-item result — never fails the whole batch because one item exceeded the limit or wasn't Submitted.
-> - Receiving: accepts receipts per line item, rejects (409) any receipt that would push received_quantity above ordered_quantity, and automatically moves the requisition to Received once every line is fully received; otherwise it stays Ordered (partial receipt).
-> - Overdue = status Ordered AND needed_by < today AND at least one line still short of its ordered quantity. Computed at query time, never stored.
-> - Alerts: each dismissal is per-approver and stores the needed_by value in effect at dismissal time. When checking if an alert is currently dismissed, compare the requisition's CURRENT needed_by to the dismissed snapshot — if they differ, treat it as not dismissed (the alert has "reappeared").
-> - Timeline/history rows (creation, every status change with old+new status and actor, rejection reasons, every receipt, every comment) are append-only. No route may update or delete a history row, ever.
-> - Submitting requires at least one line item.
-> - Requisitions can be archived/restored from any status; archiving only hides them from default list views (sets archived_at), never blocks a workflow action.
-> 
-> API CONTRACT: implement exactly the endpoints listed under "API endpoints" in the attached plan (Section 4) — same paths, methods, request bodies, and response shapes, including the {error:{code,message}} error format for every failure case (400/401/403/404/409/500) via a single global error-handling middleware fed by the AppError hierarchy above.
-> 
-> SEARCH/LIST: the GET /requisitions endpoint must filter, sort, and paginate entirely in SQL (search over title+vendor_name, filters for status/department/owner_id/overdue/assigned_to_me, sort by needed_by/total/status, page+page_size with a returned total count) — never fetch all rows and filter in JS.
-> 
-> TESTING: write Jest unit tests for the business-rule modules (approvals, receiving, alerts, bulk-approve, total calculation) covering the boundary cases listed in Section 6 of the attached plan, plus Jest+Supertest integration tests for the full lifecycle happy path, role/ownership enforcement, and illegal-transition rejection.
-> 
-> Add comments explaining any non-obvious rule (e.g. why assignment isn't a permission gate, why totals aren't stored, why alert dismissals snapshot needed_by). Use only: express, pg, zod, jsonwebtoken (or supabase-js purely for JWT/JWKS verification), cors, dotenv, jest, supertest. No ORM.
-
+> -Now start working on the backend part of the purchase-requisition application based on the requirements and plan we discussed.
+Use Node.js, TypeScript and Express, with PostgreSQL on Supabase. Supabase Auth will be used for authentication, and the backend should verify the logged-in user's identity and permissions.
+The backend needs to handle the main functionality from the assignment, including creating and managing requisitions, line items, approvals, rejection, receiving, alerts, comments, timeline/history, archiving, dashboard data, searching/filtering, and CSV export.
+Make sure the important business rules are enforced on the backend and not only on the frontend. For example, users should not be able to perform actions that their role or the requisition status doesn't allow.
+Keep the API consistent with the requirements so that the frontend can use it easily. Also handle errors properly and return useful error messages to the frontend.
+Add tests for the important business rules and edge cases, especially approval limits, receiving, role-based access, status changes, and other cases that we identify while building.
+Keep the code simple and maintainable and don't add unnecessary dependencies. You can decide the appropriate project structure and modules based on the requirements.
+After implementing each major part, explain what was done and mention anything I should check or test before we move forward.
 ---
 
 ## Prompt Group 2: Overdue Alert Dismissal & Reappearance Logic
