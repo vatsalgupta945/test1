@@ -4,42 +4,21 @@ This document records the exact prompts and workflow instructions used across al
 
 ---
 
-## Prompt Group 0A: Initial Assignment Brief & Architecture Strategy Request
-**Goal**: Request a modular implementation plan, identification of edge cases/ambiguities, error handling strategy, Supabase PostgreSQL schema, and generation of specialized prompts for Lovable (Frontend) and Antigravity (Backend).
+##Prompt Group 0A: Initial Planning
 
-**Prompt**:
-> 1. do not generate code for now
-> create a complete implementation plan structured
-> use only modular approach where each module handles single responsibility
-> handle errors gracefully using exception
-> create a test suite to test functionality
-> write a detailed documentation in README.md
-> specify assumptions wherever required and also add comments in the code
-> before proceeding, identify any ambiguities or edge cases
-> keep the implementation minimal and do not introduce any unnecessary dependencies
-> this is the assignment i have been given
-> i will make backend using antigravity 
-> abd frontend using lovable 
-> i want this application to be fast running 
-> and database as supabase 
-> i will deploy frontend at vercel and backend at render 
-> so generate separate prompts for frontend and backend 
-> all api endpoints document them so that i can give lovable to create my front end part
-> 
-> 2. so now you have generated implementaion plan and prompts what should be my next steps to build the application
-> 
-> 3. create a plan md document that i can post and also how will i do the supabase database creation
-> 
-> 4. can this work be done by antigravity instead or by me?
+Goal: Understand the assignment properly before starting development and decide the next steps.
 
-**Output Evaluation**:
-- **Strategy & Plan Produced**:
-  1. Identified 10 core domain modules (profiles, requisitions, line items, approvals, ordering, receiving, assigned approvers, comments, timeline, alerts, dashboard, exports).
-  2. Defined clear boundaries: zero client-side totals, immutable single-writer timeline, snapshotting alert dismissals.
-  3. Outlined the complete REST API contract and Supabase PostgreSQL schema DDL.
-  4. Formulated specialized master prompts for Lovable (React + Vite + Tailwind frontend) and Antigravity (Node.js + Express + TypeScript backend).
+**Prompt:**
 
----
+«I have been given this purchase-requisition system as a take-home assignment. Before writing any code, first go through the requirements and help me understand what needs to be built.
+
+Make an implementation plan and point out anything that is unclear, any assumptions we need to make, and possible edge cases that I should take care of.
+
+I am planning to use Supabase for the database and authentication, Lovable for the frontend, and Antigravity for the backend. I want the application to be reasonably fast and simple without adding unnecessary things.
+
+For now, don't write the actual code. First tell me how we should approach the project, what should be done first, what needs to be decided, and what the frontend will need from the backend.
+
+Once the plan is clear, tell me what my next steps should be to start building the application.»
 
 ## Prompt Group 0B: Generated Master Frontend Prompt (for Lovable)
 **Goal**: Specialized generation prompt specifying full frontend UI requirements, Supabase auth integration, role routing, and API integration.
